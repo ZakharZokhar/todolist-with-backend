@@ -1,0 +1,50 @@
+version: '2'
+
+services:
+  client:
+    container_name: client
+    build:
+      context: ./todo
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./todo:/client
+      - /todo/node_modules
+    links:
+      - api
+    stdin_open: true
+    networks:
+      - my_net 
+  
+  api:
+    container_name: api
+    build:
+      context: ./serverForTodo
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./serverForTodo:/api
+      - /serverForTodo/node_modules
+    depends_on:
+      - mongodb
+    stdin_open: true
+    networks:
+      - my_net
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    volumes:
+      - ./data/db:/data/db
+    ports:
+      - 27017:27017
+    command: mongod
+    stdin_open: true
+    networks:
+      - my_net
+
+networks:
+  my_net:
+    driver: bridge
